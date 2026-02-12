@@ -34,9 +34,6 @@ from pipecat.transports.daily.transport import DailyParams, DailyTransport
 from pipecat.turns.user_stop import TurnAnalyzerUserTurnStopStrategy
 from pipecat.turns.user_turn_strategies import UserTurnStrategies
 
-# Configure Python standard logging to show INFO messages from anam SDK
-logging.getLogger("anam").setLevel(logging.DEBUG)
-
 load_dotenv(override=True)
 
 REQUIRED_ENV_VARS = [
@@ -79,7 +76,7 @@ transport_params = {
 
 
 async def run_bot(transport: BaseTransport, runner_args: RunnerArguments):
-    logger.info(f"Starting bot")
+    logger.info("Starting bot")
     stt = DeepgramSTTService(api_key=os.getenv("DEEPGRAM_API_KEY"))
 
     tts = CartesiaTTSService(
@@ -91,7 +88,7 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments):
     avatar_id = os.getenv("ANAM_AVATAR_ID", "").strip().strip('"')
 
     # Create ephemeral persona config with only avatar_id set and audio passthrough enabled.
-    # This completely disables Anam's orchestration layer and feeds the TTS directly to the avatar generation.
+    # This disables Anam's orchestration layer and feeds the TTS directly to the avatar generation.
     persona_config = PersonaConfig(
         avatar_id=avatar_id,
         enable_audio_passthrough=True,
@@ -147,7 +144,7 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments):
 
     @transport.event_handler("on_client_connected")
     async def on_client_connected(transport, client):
-        logger.info(f"Client connected")
+        logger.info("Client connected")
         # Updating publishing settings to enable adaptive bitrate
         if isinstance(transport, DailyTransport):
             await transport.update_publishing(
@@ -171,7 +168,7 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments):
 
     @transport.event_handler("on_client_disconnected")
     async def on_client_disconnected(transport, client):
-        logger.info(f"Client disconnected")
+        logger.info("Client disconnected")
         await task.cancel()
 
     runner = PipelineRunner(handle_sigint=runner_args.handle_sigint)
